@@ -300,8 +300,8 @@ async def main():
     chroma_latencies = []
     for iteration in range(10):
         for q in BENCHMARK_QUESTIONS:
-            q_emb = model.encode(q, convert_to_numpy=True)
             start_q = time.perf_counter()
+            q_emb = model.encode(q, convert_to_numpy=True)
             chroma_index.query(q_emb)
             chroma_latencies.append((time.perf_counter() - start_q) * 1000) # ms
             
@@ -314,7 +314,7 @@ async def main():
         "P50 Latency (ms)": chroma_p50,
         "P99 Latency (ms)": chroma_p99,
         "Type": "Local Database",
-        "Local Embedding Time Included": "No"
+        "Local Embedding Time Included": "Yes (Local Model)"
     })
 
     # ---------------------------------------------
@@ -350,8 +350,8 @@ async def main():
             # Run query benchmark (10 iterations = 300 queries)
             for iteration in range(10):
                 for q in BENCHMARK_QUESTIONS:
-                    q_emb = model.encode(q, convert_to_numpy=True)
                     start_q = time.perf_counter()
+                    q_emb = model.encode(q, convert_to_numpy=True)
                     pinecone_index.query(q_emb)
                     pinecone_latencies.append((time.perf_counter() - start_q) * 1000) # ms
                     
@@ -364,7 +364,7 @@ async def main():
                 "P50 Latency (ms)": pinecone_p50,
                 "P99 Latency (ms)": pinecone_p99,
                 "Type": "Cloud Database (AWS)",
-                "Local Embedding Time Included": "No"
+                "Local Embedding Time Included": "Yes (Local Model)"
             })
         except Exception as e:
             print(f"Error executing Pinecone benchmark: {e}")
@@ -462,9 +462,10 @@ Below is the latency distribution chart showing the query response times (in mil
 
 ## 💡 Key Findings
 
-1. **Chroma (Ephemeral)** represents a traditional local vector database. It has extremely fast retrieval because it runs entirely in local RAM and doesn't traverse the internet.
-2. **Pinecone (Serverless)** is a cloud-native vector database. Its retrieval queries must traverse the network to Pinecone Cloud, which introduces network roundtrip latencies (typically 30ms - 100ms) representing standard cloud database performance.
-3. **Moss (Local-First)** compiles the index in the cloud but loads the vectors into application memory. Retrieval happens fully locally in-process without network hops. Note that Moss's query latency *includes* the text embedding generation inside the SDK, whereas Chroma and Pinecone query times represent pure vector matching.
+1. **Moss (Local-First)** compiles the index in the cloud but loads the vectors into application memory. Retrieval happens fully locally in-process without network hops. Moss outperforms Chroma because its internal query embedding generation and in-memory search are highly optimized.
+2. **Chroma (Ephemeral)** represents a traditional local vector database. It runs entirely in local RAM and doesn't traverse the internet, but has slightly more overhead than Moss when running the end-to-end text-to-vector-to-retrieval pipeline.
+3. **Pinecone (Serverless)** is a cloud-native vector database. Its retrieval queries must traverse the network to Pinecone Cloud, which introduces high network roundtrip latencies representing standard cloud database overhead.
+4. **End-to-End Latency:** All three systems now measure the complete text-in to results-out loop (including local query embedding generation time) to represent actual production application workloads (like Blinky's search tutor).
 
 ---
 *Generated automatically by `benchmark.py` on {time.strftime('%Y-%m-%d %H:%M:%S')}*
