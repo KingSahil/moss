@@ -4,6 +4,7 @@ This repository documents the benchmarking results for the **Blinky** AI Desktop
 
 ## ⚙️ Environment Details
 * **Dataset:** 30 test queries run against local docs (`blinky/*.md` AI documentation files).
+* **Chunk Settings:** 600 characters (overlap: 100). Total chunks: 126.
 * **Embedding Model:** `sentence-transformers/all-MiniLM-L6-v2` (384 dimensions).
 * **Execution:** Run locally from `c:/projects/moss`.
 
@@ -11,9 +12,9 @@ This repository documents the benchmarking results for the **Blinky** AI Desktop
 
 | System                |   Indexing Time (s) |   P50 Latency (ms) |   P99 Latency (ms) | Type                 | Local Embedding Time Included   |
 |:----------------------|--------------------:|-------------------:|-------------------:|:---------------------|:--------------------------------|
-| Chroma (Ephemeral)    |           0.0490263 |           10.7002  |            13.8699 | Local Database       | Yes (Local Model)               |
-| Pinecone (Serverless) |           4.46344   |          525.533   |           632.932  | Cloud Database (AWS) | Yes (Local Model)               |
-| Moss (Local-First)    |           8.6087    |            5.35045 |             7.193  | Local Memory Engine  | Yes (Embedded in SDK)           |
+| Chroma (Ephemeral)    |           0.0575662 |            11.9072 |           14.5276  | Local Database       | Yes (Local Model)               |
+| Pinecone (Serverless) |           4.48807   |           499.604  |          653.863   | Cloud Database (AWS) | Yes (Local Model)               |
+| Moss (Local-First)    |           8.76386   |             5.2205 |            8.58462 | Local Memory Engine  | Yes (Embedded in SDK)           |
 
 ## 🔍 Visual Analysis
 
@@ -29,4 +30,4 @@ Below is the latency distribution chart showing the query response times (in mil
 4. **End-to-End Latency:** All three systems now measure the complete text-in to results-out loop (including local query embedding generation time) to represent actual production application workloads (like Blinky's search tutor).
 
 ---
-*Generated automatically by `benchmark.py` on 2026-06-13 13:29:15*
+*Generated automatically by `run_benchmark.py` on 2026-06-13 13:53:08*
